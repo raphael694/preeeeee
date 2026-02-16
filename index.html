@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVIATOR - Prédiction</title>
+    <!-- Fonts: Audiowide pour titres, Space Mono pour le reste -->
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Mono&display=swap" rel="stylesheet">
+    
+<style>
+        :root {
+    --red: #ff0000; 
+    --bg: #000000; 
+    --card-bg: #0a0a0a;
+    --accent: #ffff00;
+        }
+        
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Space Mono', monospace; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            padding: 20px; 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        .card { 
+            width: 100%; 
+            max-width: 380px; 
+            background: var(--card-bg); 
+            border: 1px solid #222; 
+            border-radius: 24px; 
+            padding: 25px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9); 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+        }
+
+        h2 { 
+            text-align: center; 
+            color: var(--red); 
+            font-family: 'Audiowide', cursive;
+            font-size: 14px; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            margin-bottom: 30px; 
+            font-weight: 900;
+        }
+
+        .input-group { margin-bottom: 18px; }
+
+        label { 
+            display: block; 
+            font-size: 10px; 
+            color: #777; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        input { 
+            width: 100%; 
+            background: #000; 
+            border: 1px solid #252525; 
+            color: #fff; 
+            padding: 14px; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            text-align: center; 
+            font-family: 'Space Mono', monospace; 
+            font-size: 16px; 
+            outline: none; 
+            transition: 0.3s ease; 
+        }
+
+        input:focus { 
+            border-color: var(--red); 
+            box-shadow: 0 0 15px rgba(255, 0, 68, 0.15);
+            background: #080808;
+        }
+
+        .hash-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 20px;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--red); 
+            color: #fff; 
+            border: none; 
+            border-radius: 14px; 
+            font-family: 'Space Mono', monospace;
+            font-weight: 800; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 0, 68, 0.3);
+        }
+
+        button:active { transform: scale(0.97); }
+
+        .res-box { 
+            margin-top: 25px; 
+            background: linear-gradient(145deg, #000, #0a0a0a); 
+            padding: 20px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 1px solid #1a1a1a; 
+            display: none; 
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .res-time { 
+            font-family: 'Audiowide', cursive;
+            font-size: 40px; 
+            font-weight: 900; 
+            color: var(--accent); 
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.4); 
+            margin: 5px 0;
+        }
+
+        .info-note {
+            font-size: 9px; 
+            color: #444; 
+            text-transform: uppercase; 
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .history-section {
+            width: 100%;
+            max-width: 380px;
+            margin-top: 25px;
+        }
+
+        .history-title {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .history-title::after { content: ''; flex: 1; height: 1px; background: #222; }
+
+        .history-list { list-style: none; padding: 0; margin: 0; }
+
+        .history-item {
+            background: #111;
+            margin-bottom: 8px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--red);
+            font-size: 14px;
+            font-family: 'Space Mono', monospace;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } }
+
+        .hist-ref { color: #666; font-size: 11px; }
+        .hist-time { color: var(--accent); font-family: 'Space Mono', monospace; }
+
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🚀Aviator - Prédiction</h2>
+
+    <div class="input-group">
+        <label>Heure de Référence (HH:MM:SS)</label>
+        <input type="text" id="tIn" placeholder="00:00:00">
+    </div>
+
+    <div class="hash-grid">
+        <div>
+            <label>1er Hex</label>
+            <input type="text" id="h1" maxlength="1" placeholder="0-F">
+        </div>
+        <div>
+            <label>Dernier Déc.</label>
+            <input type="text" id="dL" maxlength="1" placeholder="0-9">
+        </div>
+        <div>
+            <label>Tail Hex</label>
+            <input type="text" id="hT" maxlength="2" placeholder="00-FF">
+        </div>
+    </div>
+
+    <button onclick="calculate()">Calculer Heure d'Entrée</button>
+
+    <div class="res-box" id="resBox">
+        <div style="font-size: 10px; color: #888; letter-spacing: 1px;">HEURE D'ENTRÉE</div>
+        <div class="res-time" id="fTime">00:00:00</div>
+        <div class="info-note">Moment recommandé pour entrer</div>
+    </div>
+</div>
+
+<div class="history-section">
+    <div class="history-title">Historique des 10 dernières entrées</div>
+    <div id="historyList" class="history-list"></div>
+    
+    <!-- BOUTON ASTUCES (eo ambanin'ny historique) -->
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="showAstuces()" style="background: #333; color: #ff0; padding: 12px 25px; border: none; border-radius: 30px; font-family: 'Space Mono', monospace; font-size: 14px; cursor: pointer; border: 1px solid #ff0; letter-spacing: 1px; width: 100%;">
+            💡 ASTUCES
+        </button>
+    </div>
+
+    <!-- ZONE ASTUCES (cachée au début) -->
+    <div id="astucesBox" style="background: #111; border-left: 4px solid #ff0; padding: 18px; border-radius: 15px; margin-top: 15px; font-family: 'Space Mono', monospace; font-size: 13px; color: #ddd; display: none; text-align: left; line-height: 1.6; border: 1px solid #333;">
+        <p style="margin: 0 0 10px 0; color: #ff0; font-weight: bold; text-align: center;">⚠️ ASTUCE IMPORTANTE ⚠️</p>
+        <p style="margin: 8px 0;">Rehefa rose in-droa mifanaraka na mifanesy,<br>ohatra: nanao prédiction ianao dia nanome heures izy, 07:57:07,<br>dia nisy rose roa nifanesy teo alohany<br><span style="color: #ff0;">→ dia aza miditra fa makà hafa.</span></p>
+        <p style="margin: 8px 0;">Mo raha te ihiditra ianao dia mazakà rafale raha tratrany.</p>
+        <p style="margin: 8px 0; font-style: italic; color: #888;">Jeux de hazard io ka aza mifanome tsiny.</p>
+        <p style="margin: 15px 0 0 0; text-align: right; color: #ff0; font-size: 11px;">🙏 Misaotra</p>
+        <p style="margin: 10px 0 0 0; color: #ff0; font-size: 11px; text-align: center;">⏱️ Heure actuelle: <span id="currentTime">00:00:00</span></p>
+    </div>
+</div>
+
+<script>
+    let historyData = [];
+
+    function calculate() {
+        const timeVal = document.getElementById('tIn').value;
+        const h1 = document.getElementById('h1').value;
+        const hT = document.getElementById('hT').value;
+
+        if (!timeVal.includes(':') || h1 === "" || hT === "") {
+            alert("Veuillez remplir l'heure, le 1er Hex et le Tail Hex");
+            return;
+        }
+
+        // --- CONVERSION DES VALEURS ---
+        let val1 = parseInt(h1, 16);           // 0-15
+        let valTail = parseInt(hT, 16);         // 0-255
+        
+        // Vérification des valeurs
+        if (isNaN(val1) || isNaN(valTail)) {
+            alert("Valeurs hexadécimales invalides");
+            return;
+        }
+
+        // --- HEURE D'ENTRÉE ---
+        let parts = timeVal.split(':');
+        if (parts.length !== 3) {
+            alert("Format d'heure invalide (HH:MM:SS)");
+            return;
+        }
+        
+        let d = new Date();
+        d.setHours(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+        
+        // Délai basé sur les valeurs hex (15-120 secondes)
+        let baseDelay = (val1 * 3) + (valTail % 45) + 15;
+        
+        // Application du délai (heure d'entrée APRÈS la référence)
+        d.setSeconds(d.getSeconds() + baseDelay);
+
+        const resultTime = d.toLocaleTimeString('fr-FR', { hour12: false });
+
+        // --- AFFICHAGE ---
+        document.getElementById('fTime').innerText = resultTime;
+        document.getElementById('resBox').style.display = 'block';
+
+        // --- HISTORIQUE ---
+        updateHistory(timeVal, resultTime);
+    }
+
+    function updateHistory(ref, result) {
+        const histObj = { ref, result };
+        historyData.unshift(histObj);
+
+        if (historyData.length > 10) {
+            historyData.pop();
+        }
+
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = '';
+
+        historyData.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <span class="hist-ref">${item.ref}</span>
+                <span class="hist-time">${item.result}</span>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // Fonction pour afficher/masquer les astuces
+    function showAstuces() {
+        let box = document.getElementById('astucesBox');
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block';
+            // Mettre à jour l'heure actuelle
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString('fr-FR', { hour12: false });
+            document.getElementById('currentTime').innerText = timeStr;
+        } else {
+            box.style.display = 'none';
+        }
+    }
+    
+    // Mettre à jour l'heure toutes les secondes (si la boîte est ouverte)
+    setInterval(function() {
+        let box = document.getElementById('astucesBox');
+        if (box && box.style.display === 'block') {
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString('fr-FR', { hour12: false });
+            document.getElementById('currentTime').innerText = timeStr;
+        }
+    }, 1000);
+</script>
+
+</body>
+</html>
